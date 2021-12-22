@@ -8,9 +8,10 @@ You need to connect ESP01 pin 8 (GPIO16) to reset!
 
 Modify domoticz IP+IDX and flash ESP; Power it on and connect to "SetupSensor" Wifi @ 192.168.4.1 ; Enter Wifi SSID+Key; Have fun
 
-P.Jeschofnik 11.2021
+P.Jeschofnik 11/2021
 
 some code snippets are from the Inet :)
+https://www.domoticz.com/wiki/ESP8266_WiFi_module
 */
 
 #include <DHT.h>
@@ -28,6 +29,8 @@ int port = 80; //Domoticz port
 int idx = 61; //IDX for temp+hum  --- virtual Temp + Humidity
 
 #define sleeptime 300e6 //deepsleep time between updates (here 300 seconds)
+
+#define tempcorr -0.8 //temperaturecorrection for DHT22 if needed (set this to 0 if not needed)
 
 
 ////////////////////////////////////////////////////////////////////////////
@@ -80,13 +83,12 @@ unsigned long currentMillis = millis();
 void getSensor()
 {
   
-Serial.println("twts");
     humidity = dht.readHumidity();
-    temp = dht.readTemperature() - 0.8 ; //0,8°C korrektur
+    temp = dht.readTemperature() + tempcorr;
     Serial.println(humidity);
     Serial.println(temp);
   
-    if(temp>1000){  //Workaround for negative temperatures
+    if(temp>1000){ 
       temp=(temp-6553.6);
     }
 }
